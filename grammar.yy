@@ -98,7 +98,11 @@
 %type <Expression*> vardef
 %type <Expression*> functioncall
 %type <Expression*> assignment
+
 %type <Expression*> expr
+%type <Expression*> op
+%type <Expression*> op_1
+%type <Expression*> op_last
 
 %type <DataType> type
 
@@ -112,33 +116,39 @@ subroutine
 	: stmts							{ log_grammar("subroutine:stmts"); $$ = currentSub; $$->expressions = $1; }
 
 stmts
-	: stmt							{ log_grammar("stmts:stmt"); $$.push_back($1); }
+	: stmt 							{ log_grammar("stmts:stmt"); $$.push_back($1); }
 	| stmts stmt					{ log_grammar("stmts:stmts stmt"); $$ = $1; $$.push_back($2); }
 
 stmt
-	: vardef 						{ log_grammar("stmt:vardef"); $$ = $1; }
-	| assignment					{ log_grammar("stmt:assignment"); $$ = $1; }
-	| functioncall					{ log_grammar("stmt:functioncall"); $$ = $1; }
+	: vardef SEMICOLON						{ log_grammar("stmt:vardef"); $$ = $1; }
+	| assignment SEMICOLON					{ log_grammar("stmt:assignment"); $$ = $1; }
+	| functioncall SEMICOLON					{ log_grammar("stmt:functioncall"); $$ = $1; }
 
 vardef
-	: type ID ASSIGN expr SEMICOLON	{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); $$->expressions.push_back($4); }
-	| type ID SEMICOLON				{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); }
+	: type ID ASSIGN expr	{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); $$->expressions.push_back($4); }
+	| type ID				{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); }
 
 functioncall
 	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(currentSub, ExprType::FUNCTIONCALL, new Symbol(DataType::FUNCTION, $1)); $$->expressions.push_back($3); }
-// 	| builtin LROUND expr RROUND	{ log_grammar("functioncall:expr"); $$ = new Expression(currentSub, ExprType::FUNCTIONCALL, new Symbol($1)); $$->expressions.push_back($3); }
-//
-// builtin
-// 	: PRINT
 
 type
 	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
 	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
 
 assignment
-	: ID ASSIGN expr SEMICOLON		{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->strValue = $1; $$->expressions.push_back($3); }
+	: ID ASSIGN expr		{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->strValue = $1; $$->expressions.push_back($3); }
 
 expr
+	: op							{ log_grammar("expr:op"); $$ = $1; }
+
+op
+	: op_1							{ log_grammar("op:op_1"); $$ = $1; }
+	| op EQUALS op_1				{ log_grammar("op:op == op_1"); $$ = new Expression(currentSub, ExprType::BINOP, BinOp::EQUALS); $$->expressions.push_back($1); $$->expressions.push_back($3); }
+
+op_1
+	: op_last						{ log_grammar("op_1:op_last"); $$ = $1; }
+
+op_last
 	: NUMBER	{ log_grammar("expr:NUMBER"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::INT; $$->value.i = $1; }
 	| TRUE		{ log_grammar("expr:TRUE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
 	| FALSE		{ log_grammar("expr:FALSE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }

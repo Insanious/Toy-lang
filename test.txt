@@ -1,4 +1,4 @@
 int a = 1;
-bool b = true;
+bool b = false;
 
-print(a)
+print(a == 2);

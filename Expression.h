@@ -19,6 +19,7 @@ public:
 	std::vector<Expression*> expressions;
 	ExprType exprType;
 	DataType dataType;
+	BinOp op;
 
 	union Value
 	{
@@ -29,12 +30,16 @@ public:
 
 	Expression(Subroutine* sub, ExprType exprType);
 	Expression(Subroutine* sub, ExprType exprType, Symbol* symbol);
+	Expression(Subroutine* sub, ExprType exprType, BinOp op);
 
 	Expression* execute();
 	void executeDefinition();
 	void executeAssignment();
 	Expression* executeFunctionCall();
+	Expression* executeBinaryOperation();
 	void executePrint();
+
+	Expression* binOpEquals();
 
 	std::string convertDefinition(Symbol* symbol, Expression* expression);
 	std::string convertAssignment(Symbol* symbol, Expression* expression);

@@ -3,7 +3,6 @@
 #include "Symbol.h"
 
 std::vector<std::string> builtinData = { "print" };
-// const vector<int> Foo::something = list_of(3)(5);
 const std::vector<std::string> Expression::builtin = builtinData;
 
 Expression::Expression(Subroutine* sub, ExprType exprType)
@@ -14,8 +13,15 @@ Expression::Expression(Subroutine* sub, ExprType exprType)
 
 Expression::Expression(Subroutine* sub, ExprType exprType, Symbol* symbol)
 {
-	this->sub = sub; this->exprType = exprType;
+	this->sub = sub;
+	this->exprType = exprType;
 	this->symbol = symbol;
+}
+
+Expression::Expression(Subroutine* sub, ExprType exprType, BinOp op)
+{
+	this->exprType = exprType;
+	this->op = op;
 }
 
 Expression* Expression::execute()
@@ -23,9 +29,10 @@ Expression* Expression::execute()
 	switch (exprType)
 	{
 		case IDENTIFIER:	return sub->lookupSymbol(strValue)->expression;
-		case DEFINITION:	executeDefinition();	break;
-		case ASSIGNMENT:	executeAssignment();	break;
-		case FUNCTIONCALL:	executeFunctionCall();	break;
+		case DEFINITION:	executeDefinition();		break;
+		case ASSIGNMENT:	executeAssignment();		break;
+		case FUNCTIONCALL:	executeFunctionCall();		break;
+		case BINOP:			return executeBinaryOperation();
 		case CONSTANT:		return this;
 	}
 
@@ -95,6 +102,16 @@ Expression* Expression::executeFunctionCall()
 	return result;
 }
 
+Expression* Expression::executeBinaryOperation()
+{
+	switch (op)
+	{
+		case EQUALS: return binOpEquals();
+	}
+
+	return nullptr;
+}
+
 void Expression::executePrint()
 {
 	// std::cout << "executePrint()\n";
@@ -109,14 +126,37 @@ void Expression::executePrint()
 	}
 }
 
+Expression* Expression::binOpEquals()
+{
+	// std::cout << "binOpEquals()\n";
+	Expression* left = expressions[0]->execute();
+	Expression* right = expressions[1]->execute();
+
+
+	if (left->dataType != right->dataType)
+		Subroutine::fatal("expected " + std::to_string(left->dataType) + " but got " + std::to_string(right->dataType));
+
+	Expression* expr = new Expression(sub, ExprType::CONSTANT);
+	expr->dataType = DataType::BOOL;
+
+	switch (left->dataType)
+	{
+		case INT:		expr->value.b = (left->value.i == right->value.i); break;
+		case BOOL:		expr->value.b = (left->value.b == right->value.b); break;
+		case FUNCTION:	Subroutine::fatal("binOpEquals: left->dataType == FUNCTION"); break;
+	}
+
+	return expr;
+}
+
 std::string Expression::convertDefinition(Symbol* symbol, Expression* expression)
 {
 	std::string output;
 
 	switch (symbol->dataType) // output type
 	{
-		case INT:	output += "int ";	break;
-		case BOOL:	output += "bool ";	break;
+		case INT:		output += "int ";	break;
+		case BOOL:		output += "bool ";	break;
 		case FUNCTION:	output += "function1 ";	break;
 	}
 

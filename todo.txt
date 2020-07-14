@@ -5,11 +5,15 @@ bool definition
 int assignment
 bool assignment
 
-REMAINING:
 print function
+
+expr == expr
+
+REMAINING:
 if statement
 if elseif else statement
 nested if statements
 for loop
 _cool_ for loop (do shit) * n
 while loop
+arithmetic
