@@ -1,0 +1,15 @@
+FINISHED:
+int definition
+bool definition
+
+int assignment
+bool assignment
+
+REMAINING:
+print function
+if statement
+if elseif else statement
+nested if statements
+for loop
+_cool_ for loop (do shit) * n
+while loop
