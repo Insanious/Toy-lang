@@ -9,8 +9,13 @@ print function
 
 expr == expr
 
-REMAINING:
 if statement
+if statement {}
+
+REMAINING:
+separate static checking
+separate code generation
+separate interpretation
 if elseif else statement
 nested if statements
 for loop

@@ -28,10 +28,11 @@ Expression* Expression::execute()
 {
 	switch (exprType)
 	{
-		case IDENTIFIER:	return sub->lookupSymbol(strValue)->expression;
 		case DEFINITION:	executeDefinition();		break;
 		case ASSIGNMENT:	executeAssignment();		break;
 		case FUNCTIONCALL:	executeFunctionCall();		break;
+		case IFSTMT:		executeIfStatement();		break;
+		case IDENTIFIER:	return sub->lookupSymbol(strValue)->expression;
 		case BINOP:			return executeBinaryOperation();
 		case CONSTANT:		return this;
 	}
@@ -110,6 +111,24 @@ Expression* Expression::executeBinaryOperation()
 	}
 
 	return nullptr;
+}
+
+void Expression::executeIfStatement()
+{
+	std::cout << "executeIfStatement()\n";
+
+	Expression* expr = expressions[0]->execute();
+
+	if (expr->exprType != ExprType::CONSTANT)
+		Subroutine::fatal("expected ExprType::CONSTANT but got " + std::to_string(expr->exprType));
+	if (expr->dataType != DataType::BOOL)
+		Subroutine::fatal("expected DataType::BOOL but got " + std::to_string(expr->dataType));
+
+	if (expr->value.b)
+	{
+		for (int i = 1; i < expressions.size(); i++)
+			expressions[i]->execute();
+	}
 }
 
 void Expression::executePrint()

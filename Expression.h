@@ -37,6 +37,7 @@ public:
 	void executeAssignment();
 	Expression* executeFunctionCall();
 	Expression* executeBinaryOperation();
+	void executeIfStatement();
 	void executePrint();
 
 	Expression* binOpEquals();

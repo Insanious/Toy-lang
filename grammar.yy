@@ -54,15 +54,16 @@
 %token <std::string> LESS_OR_EQUAL
 %token <std::string> MORE_OR_EQUAL
 
+/* Functions */
+%token <std::string> RETURN
+%token <std::string> BREAK
+%token <std::string> FUNCTION
+
+
 /* Unary operations */
 %token <std::string> NOT
 %token <std::string> AND
 %token <std::string> OR
-
-/* Functions */
-%token <std::string> FUNCTION
-%token <std::string> BREAK
-%token <std::string> RETURN
 
 /* Types */
 %token <std::string> INT
@@ -98,6 +99,7 @@
 %type <Expression*> vardef
 %type <Expression*> functioncall
 %type <Expression*> assignment
+%type <Expression*> ifstmt
 
 %type <Expression*> expr
 %type <Expression*> op
@@ -120,13 +122,18 @@ stmts
 	| stmts stmt					{ log_grammar("stmts:stmts stmt"); $$ = $1; $$.push_back($2); }
 
 stmt
-	: vardef SEMICOLON						{ log_grammar("stmt:vardef"); $$ = $1; }
-	| assignment SEMICOLON					{ log_grammar("stmt:assignment"); $$ = $1; }
-	| functioncall SEMICOLON					{ log_grammar("stmt:functioncall"); $$ = $1; }
+	: vardef SEMICOLON				{ log_grammar("stmt:vardef"); $$ = $1; }
+	| assignment SEMICOLON			{ log_grammar("stmt:assignment"); $$ = $1; }
+	| functioncall SEMICOLON		{ log_grammar("stmt:functioncall"); $$ = $1; }
+	| ifstmt						{ log_grammar("stmt:ifstmt"); $$ = $1; }
+
+ifstmt
+	: IF LROUND expr RROUND stmt	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(currentSub, ExprType::IFSTMT); $$->expressions.push_back($3); $$->expressions.push_back($5); }
+	| IF LROUND expr RROUND LCURLY stmts RCURLY	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(currentSub, ExprType::IFSTMT); $$->expressions = $6; $$->expressions.insert($$->expressions.begin(), $3); }
 
 vardef
-	: type ID ASSIGN expr	{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); $$->expressions.push_back($4); }
-	| type ID				{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); }
+	: type ID ASSIGN expr			{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); $$->expressions.push_back($4); }
+	| type ID						{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); }
 
 functioncall
 	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(currentSub, ExprType::FUNCTIONCALL, new Symbol(DataType::FUNCTION, $1)); $$->expressions.push_back($3); }
@@ -136,7 +143,7 @@ type
 	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
 
 assignment
-	: ID ASSIGN expr		{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->strValue = $1; $$->expressions.push_back($3); }
+	: ID ASSIGN expr				{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->strValue = $1; $$->expressions.push_back($3); }
 
 expr
 	: op							{ log_grammar("expr:op"); $$ = $1; }
@@ -149,7 +156,7 @@ op_1
 	: op_last						{ log_grammar("op_1:op_last"); $$ = $1; }
 
 op_last
-	: NUMBER	{ log_grammar("expr:NUMBER"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::INT; $$->value.i = $1; }
-	| TRUE		{ log_grammar("expr:TRUE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
-	| FALSE		{ log_grammar("expr:FALSE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
-	| ID		{ log_grammar("expr:ID"); $$ = new Expression(currentSub, ExprType::IDENTIFIER); $$->strValue = $1; }
+	: NUMBER						{ log_grammar("expr:NUMBER"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::INT; $$->value.i = $1; }
+	| TRUE							{ log_grammar("expr:TRUE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
+	| FALSE							{ log_grammar("expr:FALSE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
+	| ID							{ log_grammar("expr:ID"); $$ = new Expression(currentSub, ExprType::IDENTIFIER); $$->strValue = $1; }

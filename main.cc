@@ -5,9 +5,9 @@
 
 extern FILE* yyin;
 extern Subroutine* currentSub;
-bool debug_lex = false;
-bool debug_grammar = false;
-bool log_output = false;
+bool debug_lex = true;
+bool debug_grammar = true;
+bool log_output = true;
 
 void yy::parser::error(std::string const&err)
 {
