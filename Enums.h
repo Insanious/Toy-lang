@@ -1,8 +1,8 @@
 #ifndef ENUMS_H
 #define ENUMS_H
 
-enum ExprType { FUNCTIONCALL, IDENTIFIER, DEFINITION, ASSIGNMENT, CONSTANT, BINOP, IFSTMT };
-enum DataType { INT, BOOL, FUNCTION };
-enum BinOp { EQUALS };
+enum class ExprType { FUNCTIONCALL, IDENTIFIER, DEFINITION, ASSIGNMENT, CONSTANT, BINOP, IFSTMT };
+enum class DataType { INT, BOOL, FUNCTION, IDENTIFIER };
+enum class BinOp { EQUALS };
 
 #endif

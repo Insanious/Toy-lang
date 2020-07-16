@@ -1,7 +1,7 @@
 FLAGS = -std=c++11 -g -Wall -Wpedantic
 
-parser: lex.yy.c grammar.tab.o Subroutine.o Symbol.o Expression.o main.cc
-	g++ $(FLAGS) -o parser grammar.tab.o Subroutine.o Symbol.o Expression.o lex.yy.c main.cc
+parser: lex.yy.c grammar.tab.o Subroutine.o Expression.o main.cc
+	g++ $(FLAGS) -o parser grammar.tab.o Subroutine.o Expression.o lex.yy.c main.cc
 grammar.tab.o: grammar.tab.cc
 	g++ $(FLAGS) -c grammar.tab.cc
 
@@ -17,9 +17,6 @@ Subroutine.o: Subroutine.cpp Subroutine.h
 
 Expression.o: Expression.cpp Expression.h
 	g++ $(FLAGS) -c Expression.cpp
-
-Symbol.o: Symbol.cpp Symbol.h
-	g++ $(FLAGS) -c Symbol.cpp
 
 re:
 	make clean && make

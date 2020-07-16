@@ -5,11 +5,11 @@
 #include <string>
 #include <iostream>
 
+#include "Value.h"
 #include "Enums.h"
 #include "globals.h"
 
 class Expression;
-class Symbol;
 
 class Subroutine
 {
@@ -18,7 +18,7 @@ public:
 	std::string name;
 	Subroutine* parent;
 	std::vector<Expression*> expressions;
-	Symbol* symbol;
+	Value* identifier;
 
 	std::string output;
 
@@ -28,8 +28,9 @@ public:
 	static void log(std::string msg);
 
 	void execute();
-	void addNewSymbol(Symbol* newSymbol);
-	Symbol* lookupSymbol(std::string name);
+	void addNewIdentifier(Value* newIdentifier);
+	Value* getIdentifierValue(std::string name);
+	bool identifierExists(std::string name);
 };
 
 #endif

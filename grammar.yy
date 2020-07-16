@@ -23,7 +23,6 @@
 	#include "Enums.h"
 	#include "Subroutine.h"
 	#include "Expression.h"
-	#include "Symbol.h"
 	#include <string>
 
 }
@@ -132,18 +131,18 @@ ifstmt
 	| IF LROUND expr RROUND LCURLY stmts RCURLY	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(currentSub, ExprType::IFSTMT); $$->expressions = $6; $$->expressions.insert($$->expressions.begin(), $3); }
 
 vardef
-	: type ID ASSIGN expr			{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); $$->expressions.push_back($4); }
-	| type ID						{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION, new Symbol($1, $2)); }
+	: type ID ASSIGN expr			{ log_grammar("vardef:expr"); $$ = new Expression(currentSub, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; $$->expressions.push_back($4); }
+	| type ID						{ log_grammar("vardef:"); $$ = new Expression(currentSub, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; }
 
 functioncall
-	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(currentSub, ExprType::FUNCTIONCALL, new Symbol(DataType::FUNCTION, $1)); $$->expressions.push_back($3); }
+	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(currentSub, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->expressions.push_back($3); }
 
 type
 	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
 	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
 
 assignment
-	: ID ASSIGN expr				{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->strValue = $1; $$->expressions.push_back($3); }
+	: ID ASSIGN expr				{ log_grammar("assignment:ID = expr"); $$ = new Expression(currentSub, ExprType::ASSIGNMENT); $$->value = new Value(DataType::IDENTIFIER); $$->value->name = $1; $$->expressions.push_back($3); }
 
 expr
 	: op							{ log_grammar("expr:op"); $$ = $1; }
@@ -156,7 +155,7 @@ op_1
 	: op_last						{ log_grammar("op_1:op_last"); $$ = $1; }
 
 op_last
-	: NUMBER						{ log_grammar("expr:NUMBER"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::INT; $$->value.i = $1; }
-	| TRUE							{ log_grammar("expr:TRUE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
-	| FALSE							{ log_grammar("expr:FALSE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value.b = $1; }
-	| ID							{ log_grammar("expr:ID"); $$ = new Expression(currentSub, ExprType::IDENTIFIER); $$->strValue = $1; }
+	: NUMBER						{ log_grammar("expr:NUMBER"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::INT; $$->value = new Value(DataType::INT); $$->value->immediate.i = $1; }
+	| TRUE							{ log_grammar("expr:TRUE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value = new Value(DataType::BOOL); $$->value->immediate.b = true; }
+	| FALSE							{ log_grammar("expr:FALSE"); $$ = new Expression(currentSub, ExprType::CONSTANT); $$->dataType = DataType::BOOL; $$->value = new Value(DataType::BOOL); $$->value->immediate.b = false; }
+	| ID							{ log_grammar("expr:ID"); $$ = new Expression(currentSub, ExprType::IDENTIFIER); $$->value = new Value(DataType::IDENTIFIER); $$->value->name = $1; }

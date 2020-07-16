@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Enums.h"
+#include "Value.h"
 
 class Subroutine;
 class Symbol;
@@ -15,21 +16,21 @@ public:
 	static const std::vector<std::string> builtin;
 
 	Subroutine* sub;
-	Symbol* symbol;
 	std::vector<Expression*> expressions;
 	ExprType exprType;
 	DataType dataType;
 	BinOp op;
 
-	union Value
-	{
-		int i;
-		bool b;
-	} value;
-	std::string strValue;
+	Value* value;
+	std::string functionName;
+	// union Value
+	// {
+	// 	int i;
+	// 	bool b;
+	// } value;
+	// std::string strValue;
 
 	Expression(Subroutine* sub, ExprType exprType);
-	Expression(Subroutine* sub, ExprType exprType, Symbol* symbol);
 	Expression(Subroutine* sub, ExprType exprType, BinOp op);
 
 	Expression* execute();

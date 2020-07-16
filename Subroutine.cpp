@@ -1,6 +1,5 @@
 #include "Subroutine.h"
 #include "Expression.h"
-#include "Symbol.h"
 
 void Subroutine::fatal(std::string msg)
 {
@@ -16,8 +15,8 @@ void Subroutine::log(std::string msg)
 
 Subroutine::Subroutine()
 {
-	this->parent = nullptr;
-	this->symbol = nullptr;
+	parent = nullptr;
+	identifier = nullptr;
 }
 
 void Subroutine::execute()
@@ -32,33 +31,51 @@ void Subroutine::execute()
 	// std::cout << '\n' << output;
 }
 
-void Subroutine::addNewSymbol(Symbol* newSymbol)
+void Subroutine::addNewIdentifier(Value* newIdentifier)
 {
-	Symbol* sym = this->symbol;
-	while (sym)
-	{
-		if (sym->name == newSymbol->name)
-			fatal("symbol '" + newSymbol->name + "' is already defined");
+	Value* val = identifier;
 
-		sym = sym->next;
+	while (val)
+	{
+		if (val->name == newIdentifier->name)
+			fatal("symbol '" + newIdentifier->name + "' is already defined");
+
+		val = val->next;
 	}
 
-	newSymbol->next = this->symbol;
-	this->symbol = newSymbol;
-	log("new symbol '" + newSymbol->name + '\'');
+
+	newIdentifier->next = identifier;
+	identifier = newIdentifier;
+	log("new symbol '" + newIdentifier->name + '\'');
 }
 
-Symbol* Subroutine::lookupSymbol(std::string name)
+Value* Subroutine::getIdentifierValue(std::string name)
 {
-	Symbol* sym = this->symbol;
-	while (sym)
-	{
-		if (sym->name == name)
-			return sym;
+	Value* val = identifier;
 
-		sym = sym->next;
+	while (val)
+	{
+		if (val->name == name)
+			return val;
+
+		val = val->next;
 	}
 
 	fatal("symbol '" + name + "' is never defined");
 	return nullptr;
+}
+
+bool Subroutine::identifierExists(std::string name)
+{
+	Value* val = identifier;
+
+	while (val)
+	{
+		if (val->name == name)
+			return true;
+
+		val = val->next;
+	}
+
+	return false;
 }
