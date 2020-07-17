@@ -12,10 +12,13 @@ expr == expr
 if statement
 if statement {}
 
+scope
+
+
 REMAINING:
 if elseif else statement
 nested if statements
 for loop
-_cool_ for loop (do shit) * n
+_cool_ for loop (loop body) * n
 while loop
 arithmetic

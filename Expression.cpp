@@ -26,12 +26,9 @@ Expression* Expression::execute()
 		case ExprType::IFSTMT:			executeIfStatement();		break;
 		case ExprType::IDENTIFIER:
 		{
-			if (sub->identifierExists(value->name))
-			{
-				Value* actualValue = sub->getIdentifierValue(value->name);
-				delete value;
-				value = actualValue;
-			}
+			Value* actualValue = sub->getIdentifierValue(value->name);
+			delete value;
+			value = actualValue;
 
 			return this;
 		}
@@ -62,9 +59,8 @@ void Expression::executeDefinition()
 			case DataType::FUNCTION:	std::cout << "executePrint() : FUNCTION";	break;
 		}
 	}
-	std::cout << "nani\n";
 
-	sub->addNewIdentifier(value); // add symbol to subroutine
+	sub->addIdentifier(value); // add symbol to subroutine
 	// sub->output += convertDefinition(this->symbol, expr); // append to output
 }
 
@@ -140,9 +136,12 @@ void Expression::executeIfStatement()
 
 	if (expr->value->immediate.b)
 	{
+		Subroutine scope = Subroutine(sub);
+
+		this->setScope(&scope); // recursively set the scope of all subexpressions
 		int size = expressions.size();
 		for (int i = 1; i < size; i++)
-			expressions[i]->execute();
+			expressions[i]->execute(); // execute all statements
 	}
 }
 
@@ -158,6 +157,15 @@ void Expression::executePrint()
 		case DataType::BOOL:		std::cout << (expr->value->immediate.b ? "true" : "false") << '\n';	break;
 		case DataType::IDENTIFIER:	std::cout << "executePrint() : IDENTIFIER";	break;
 		case DataType::FUNCTION:	std::cout << "executePrint() : FUNCTION";	break;
+	}
+}
+
+void Expression::setScope(Subroutine* scope)
+{
+	for (auto expression : expressions)
+	{
+		expression->sub = scope;
+		expression->setScope(scope);
 	}
 }
 

@@ -18,17 +18,10 @@ public:
 	Subroutine* sub;
 	std::vector<Expression*> expressions;
 	ExprType exprType;
-	DataType dataType;
 	BinOp op;
 
 	Value* value;
 	std::string functionName;
-	// union Value
-	// {
-	// 	int i;
-	// 	bool b;
-	// } value;
-	// std::string strValue;
 
 	Expression(Subroutine* sub, ExprType exprType);
 	Expression(Subroutine* sub, ExprType exprType, BinOp op);
@@ -40,6 +33,8 @@ public:
 	Expression* executeBinaryOperation();
 	void executeIfStatement();
 	void executePrint();
+
+	void setScope(Subroutine* scope);
 
 	Expression* binOpEquals();
 

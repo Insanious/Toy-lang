@@ -18,17 +18,19 @@ public:
 	std::string name;
 	Subroutine* parent;
 	std::vector<Expression*> expressions;
-	Value* identifier;
+	std::vector<Value*> identifiers;
+	Value* head;
 
 	std::string output;
 
 	Subroutine();
+	Subroutine(Subroutine* parent);
 
 	static void fatal(std::string msg);
 	static void log(std::string msg);
 
 	void execute();
-	void addNewIdentifier(Value* newIdentifier);
+	void addIdentifier(Value* identifier);
 	Value* getIdentifierValue(std::string name);
 	bool identifierExists(std::string name);
 };

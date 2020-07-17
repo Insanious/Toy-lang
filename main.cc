@@ -4,9 +4,9 @@
 #include "Subroutine.h"
 
 extern FILE* yyin;
-extern Subroutine* currentSub;
-bool debug_lex = true;
-bool debug_grammar = true;
+extern Subroutine* global;
+bool debug_lex = false;
+bool debug_grammar = false;
 bool log_output = true;
 
 void yy::parser::error(std::string const&err)
@@ -16,7 +16,7 @@ void yy::parser::error(std::string const&err)
 
 int main(int argc, char **argv)
 {
-	currentSub = new Subroutine();
+	global = new Subroutine();
 
 	if (argc != 2)
 	{
@@ -29,7 +29,7 @@ int main(int argc, char **argv)
 	yy::parser parser;
 	if(!parser.parse())
 	{
-		currentSub->execute();
+		global->execute();
 	}
 
 	return 0;

@@ -16,7 +16,13 @@ void Subroutine::log(std::string msg)
 Subroutine::Subroutine()
 {
 	parent = nullptr;
-	identifier = nullptr;
+	head = nullptr;
+}
+
+Subroutine::Subroutine(Subroutine* parent)
+{
+	this->parent = parent;
+	head = nullptr;
 }
 
 void Subroutine::execute()
@@ -31,34 +37,32 @@ void Subroutine::execute()
 	// std::cout << '\n' << output;
 }
 
-void Subroutine::addNewIdentifier(Value* newIdentifier)
+void Subroutine::addIdentifier(Value* identifier)
 {
-	Value* val = identifier;
-
-	while (val)
+	Subroutine* scope = this;
+	while (scope)
 	{
-		if (val->name == newIdentifier->name)
-			fatal("symbol '" + newIdentifier->name + "' is already defined");
+		for (auto id : identifiers)
+			if (id->name == identifier->name)
+				fatal("symbol '" + identifier->name + "' is already defined");
 
-		val = val->next;
+		scope = scope->parent;
 	}
 
-
-	newIdentifier->next = identifier;
-	identifier = newIdentifier;
-	log("new symbol '" + newIdentifier->name + '\'');
+	identifiers.push_back(identifier);
+	log("new symbol '" + identifier->name + '\'');
 }
 
 Value* Subroutine::getIdentifierValue(std::string name)
 {
-	Value* val = identifier;
-
-	while (val)
+	Subroutine* scope = this;
+	while (scope)
 	{
-		if (val->name == name)
-			return val;
+		for (auto id : scope->identifiers)
+			if (id->name == name)
+				return id;
 
-		val = val->next;
+		scope = scope->parent;
 	}
 
 	fatal("symbol '" + name + "' is never defined");
@@ -67,14 +71,14 @@ Value* Subroutine::getIdentifierValue(std::string name)
 
 bool Subroutine::identifierExists(std::string name)
 {
-	Value* val = identifier;
-
-	while (val)
+	Subroutine* scope = this;
+	while (scope)
 	{
-		if (val->name == name)
-			return true;
+		for (auto id : scope->identifiers)
+			if (id->name == name)
+				return true;
 
-		val = val->next;
+		scope = scope->parent;
 	}
 
 	return false;
