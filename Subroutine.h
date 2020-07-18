@@ -19,7 +19,6 @@ public:
 	Subroutine* parent;
 	std::vector<Expression*> expressions;
 	std::vector<Value*> identifiers;
-	Value* head;
 
 	std::string output;
 
