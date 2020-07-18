@@ -28,6 +28,7 @@ public:
 	static void fatal(std::string msg);
 	static void log(std::string msg);
 
+	void clearIdentifiers();
 	void execute();
 	void addIdentifier(Value* identifier);
 	Value* getIdentifierValue(std::string name);

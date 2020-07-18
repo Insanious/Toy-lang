@@ -23,6 +23,18 @@ Subroutine::Subroutine(Subroutine* parent)
 	this->parent = parent;
 }
 
+void Subroutine::clearIdentifiers()
+{
+	int size = identifiers.size();
+	for(int i = 0; i < size; i++)
+	{
+		std::cout << identifiers[i]->name << '\n';
+		delete identifiers[i];
+		identifiers[i] = nullptr;
+	}
+	identifiers.clear();
+}
+
 void Subroutine::execute()
 {
 	Expression* res = nullptr;
@@ -41,13 +53,15 @@ void Subroutine::addIdentifier(Value* identifier)
 	while (scope)
 	{
 		for (auto id : identifiers)
+		{
+			std::cout << id << '\n';
 			if (id->name == identifier->name)
 				fatal("symbol '" + identifier->name + "' is already defined");
-
+		}
 		scope = scope->parent;
 	}
 
-	identifiers.push_back(identifier);
+	identifiers.push_back(new Value(*identifier)); // make new copy
 	log("new symbol '" + identifier->name + '\'');
 }
 

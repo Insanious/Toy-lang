@@ -17,6 +17,7 @@ public:
 
 	Subroutine* sub;
 	std::vector<Expression*> expressions;
+	std::vector<Expression*> block;
 	ExprType exprType;
 	BinOp op;
 
@@ -32,6 +33,7 @@ public:
 	Expression* executeFunctionCall();
 	Expression* executeBinaryOperation();
 	void executeIfStatement();
+	void executeForLoop();
 	void executePrint();
 
 	void setScope(Subroutine* scope);

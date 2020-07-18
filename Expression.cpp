@@ -24,12 +24,11 @@ Expression* Expression::execute()
 		case ExprType::ASSIGNMENT:		executeAssignment();		break;
 		case ExprType::FUNCTIONCALL:	executeFunctionCall();		break;
 		case ExprType::IFSTMT:			executeIfStatement();		break;
+		case ExprType::FORLOOP:			executeForLoop();			break;
 		case ExprType::IDENTIFIER:
 		{
-			Value* actualValue = sub->getIdentifierValue(value->name);
 			delete value;
-			value = actualValue;
-
+			value = sub->getIdentifierValue(value->name);
 			return this;
 		}
 		case ExprType::BINOP:			return executeBinaryOperation();
@@ -49,7 +48,7 @@ void Expression::executeDefinition()
 	{
 		expr = expressions[0]->execute();
 		if (value->dataType != expr->value->dataType)
-			Subroutine::fatal("datatype mismatch: expected " + std::to_string((int)this->value->dataType) + " but got " + std::to_string((int)expr->value->dataType));
+			Subroutine::fatal("datatype mismatch: expected " + std::to_string((int)value->dataType) + " but got " + std::to_string((int)expr->value->dataType));
 
 		switch (value->dataType) // assign the expression to the identifier
 		{
@@ -145,9 +144,30 @@ void Expression::executeIfStatement()
 	}
 }
 
+void Expression::executeForLoop()
+{
+	if (expressions.size() == 1) // bracketloop
+	{
+		Expression* condition = expressions[0];
+		if (condition->value->dataType != DataType::INT)
+			Subroutine::fatal("expected DataType::INT but got " + std::to_string((int)condition->value->dataType));
+
+		Subroutine scope = Subroutine(sub);
+		this->setScope(&scope);
+		int size = block.size();
+		for (int i = 0; i < condition->value->immediate.i; i++)
+		{
+			for (int j = 0; j < size; j++)
+				block[j]->execute();
+
+			scope.clearIdentifiers();
+		}
+	}
+}
+
 void Expression::executePrint()
 {
-	std::cout << "executePrint()\n";
+	// std::cout << "executePrint()\n";
 
 	Expression* expr = expressions[0]->execute();
 
@@ -166,6 +186,11 @@ void Expression::setScope(Subroutine* scope)
 	{
 		expression->sub = scope;
 		expression->setScope(scope);
+	}
+	for (auto statement : block)
+	{
+		statement->sub = scope;
+		statement->setScope(scope);
 	}
 }
 

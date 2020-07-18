@@ -7,7 +7,6 @@
 class Value
 {
 public:
-	Value* next;
 	DataType dataType;
 	std::string name;
 	union Immediate
@@ -17,7 +16,14 @@ public:
 	} immediate;
 	std::string str;
 
-	Value(DataType dataType) { this->dataType = dataType; this->next = nullptr; }
+	Value(DataType dataType) { this->dataType = dataType; }
+	Value(const Value &other)
+	{
+		this->dataType = other.dataType;
+		this->name = other.name;
+		this->immediate = other.immediate;
+		this->str = other.str;
+	}
 };
 
 #endif

@@ -7,7 +7,7 @@ extern FILE* yyin;
 extern Subroutine* global;
 bool debug_lex = false;
 bool debug_grammar = false;
-bool log_output = true;
+bool log_output = false;
 
 void yy::parser::error(std::string const&err)
 {

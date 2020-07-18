@@ -93,12 +93,14 @@
 %type <Subroutine*> subroutine
 
 %type <std::vector<Expression*>> stmts
+%type <std::vector<Expression*>> block
 
 %type <Expression*> stmt
 %type <Expression*> vardef
 %type <Expression*> functioncall
 %type <Expression*> assignment
 %type <Expression*> ifstmt
+%type <Expression*> forloop
 
 %type <Expression*> expr
 %type <Expression*> op
@@ -125,10 +127,17 @@ stmt
 	| assignment SEMICOLON			{ log_grammar("stmt:assignment"); $$ = $1; }
 	| functioncall SEMICOLON		{ log_grammar("stmt:functioncall"); $$ = $1; }
 	| ifstmt						{ log_grammar("stmt:ifstmt"); $$ = $1; }
+	| forloop						{ log_grammar("stmt:forloop"); $$ = $1; }
 
 ifstmt
 	: IF LROUND expr RROUND stmt	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions.push_back($3); $$->expressions.push_back($5); }
-	| IF LROUND expr RROUND LCURLY stmts RCURLY	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions = $6; $$->expressions.insert($$->expressions.begin(), $3); }
+	| IF LROUND expr RROUND block	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions = $5; $$->expressions.insert($$->expressions.begin(), $3); }
+
+forloop
+	: block MUL expr SEMICOLON		{ log_grammar("forloop:bracketloop"); $$ = new Expression(global, ExprType::FORLOOP); $$->block = $1; $$->expressions.push_back($3); }
+
+block
+	: LCURLY stmts RCURLY			{ log_grammar("block:"); $$ = $2; }
 
 vardef
 	: type ID ASSIGN expr			{ log_grammar("vardef:expr"); $$ = new Expression(global, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; $$->expressions.push_back($4); }
