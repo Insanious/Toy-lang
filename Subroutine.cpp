@@ -16,13 +16,11 @@ void Subroutine::log(std::string msg)
 Subroutine::Subroutine()
 {
 	parent = nullptr;
-	head = nullptr;
 }
 
 Subroutine::Subroutine(Subroutine* parent)
 {
 	this->parent = parent;
-	head = nullptr;
 }
 
 void Subroutine::execute()
