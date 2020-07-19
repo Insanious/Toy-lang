@@ -5,6 +5,7 @@
 #include <string>
 
 #include "Enums.h"
+#include "globals.h"
 #include "Value.h"
 
 class Subroutine;
@@ -13,6 +14,8 @@ class Symbol;
 class Expression
 {
 public:
+	void log_calls(std::string msg);
+
 	static const std::vector<std::string> builtin;
 
 	Subroutine* sub;
@@ -31,7 +34,7 @@ public:
 	void executeDefinition();
 	void executeAssignment();
 	Expression* executeFunctionCall();
-	Expression* executeBinaryOperation();
+	Expression* executeBinOp();
 	void executeIfStatement();
 	void executeForLoop();
 	void executePrint();

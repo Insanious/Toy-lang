@@ -1,3 +1,2 @@
-{
+if (true)
 	print(true);
-} * 20;

@@ -130,8 +130,8 @@ stmt
 	| forloop						{ log_grammar("stmt:forloop"); $$ = $1; }
 
 ifstmt
-	: IF LROUND expr RROUND stmt	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions.push_back($3); $$->expressions.push_back($5); }
-	| IF LROUND expr RROUND block	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions = $5; $$->expressions.insert($$->expressions.begin(), $3); }
+	: IF LROUND expr RROUND stmt	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions.push_back($3); $$->block.push_back($5); }
+	| IF LROUND expr RROUND block	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions.push_back($3); $$->block = $5; }
 
 forloop
 	: block MUL expr SEMICOLON		{ log_grammar("forloop:bracketloop"); $$ = new Expression(global, ExprType::FORLOOP); $$->block = $1; $$->expressions.push_back($3); }

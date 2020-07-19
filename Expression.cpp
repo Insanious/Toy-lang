@@ -4,6 +4,12 @@
 std::vector<std::string> builtinData = { "print" };
 const std::vector<std::string> Expression::builtin = builtinData;
 
+void Expression::log_calls(std::string msg)
+{
+	if (debug_calls)
+		std::cout << "CALL: " << msg << '\n';
+}
+
 Expression::Expression(Subroutine* sub, ExprType exprType)
 {
 	this->sub = sub;
@@ -12,6 +18,7 @@ Expression::Expression(Subroutine* sub, ExprType exprType)
 
 Expression::Expression(Subroutine* sub, ExprType exprType, BinOp op)
 {
+	this->sub = sub;
 	this->exprType = exprType;
 	this->op = op;
 }
@@ -31,7 +38,7 @@ Expression* Expression::execute()
 			value = sub->getIdentifierValue(value->name);
 			return this;
 		}
-		case ExprType::BINOP:			return executeBinaryOperation();
+		case ExprType::BINOP:			return executeBinOp();
 		case ExprType::CONSTANT:		return this;
 	}
 
@@ -40,7 +47,7 @@ Expression* Expression::execute()
 
 void Expression::executeDefinition()
 {
-	std::cout << "executeDefinition()\n";
+	log_calls("executeDefinition()");
 
 	Expression* expr = nullptr;
 
@@ -65,7 +72,7 @@ void Expression::executeDefinition()
 
 void Expression::executeAssignment()
 {
-	std::cout << "executeAssignment()\n";
+	log_calls("executeAssignment()");
 
 	Value* currentValue = sub->getIdentifierValue(value->name);
 
@@ -88,7 +95,7 @@ void Expression::executeAssignment()
 
 Expression* Expression::executeFunctionCall()
 {
-	// std::cout << "executeFunctionCall()\n";
+	log_calls("executeFunctionCall()");
 
 	Expression* result = nullptr;
 	bool isBuiltin = false;
@@ -112,8 +119,9 @@ Expression* Expression::executeFunctionCall()
 	return result;
 }
 
-Expression* Expression::executeBinaryOperation()
+Expression* Expression::executeBinOp()
 {
+	log_calls("executeBinOp()");
 	switch (op)
 	{
 		case BinOp::EQUALS: return binOpEquals();
@@ -124,7 +132,7 @@ Expression* Expression::executeBinaryOperation()
 
 void Expression::executeIfStatement()
 {
-	std::cout << "executeIfStatement()\n";
+	log_calls("executeIfStatement()");
 
 	Expression* expr = expressions[0]->execute();
 
@@ -138,14 +146,16 @@ void Expression::executeIfStatement()
 		Subroutine scope = Subroutine(sub);
 
 		this->setScope(&scope); // recursively set the scope of all subexpressions
-		int size = expressions.size();
-		for (int i = 1; i < size; i++)
-			expressions[i]->execute(); // execute all statements
+		int size = block.size();
+		for (int i = 0; i < size; i++)
+			block[i]->execute(); // execute all statements
 	}
 }
 
 void Expression::executeForLoop()
 {
+	log_calls("executeForLoop()");
+
 	if (expressions.size() == 1) // bracketloop
 	{
 		Expression* condition = expressions[0];
@@ -167,7 +177,7 @@ void Expression::executeForLoop()
 
 void Expression::executePrint()
 {
-	// std::cout << "executePrint()\n";
+	log_calls("executePrint()");
 
 	Expression* expr = expressions[0]->execute();
 
@@ -182,11 +192,11 @@ void Expression::executePrint()
 
 void Expression::setScope(Subroutine* scope)
 {
-	for (auto expression : expressions)
-	{
-		expression->sub = scope;
-		expression->setScope(scope);
-	}
+	// for (auto expression : expressions)
+	// {
+	// 	expression->sub = scope;
+	// 	expression->setScope(scope);
+	// }
 	for (auto statement : block)
 	{
 		statement->sub = scope;
@@ -196,7 +206,8 @@ void Expression::setScope(Subroutine* scope)
 
 Expression* Expression::binOpEquals()
 {
-	std::cout << "binOpEquals()\n";
+	log_calls("binOpEquals()");
+
 	Expression* left = expressions[0]->execute();
 	Expression* right = expressions[1]->execute();
 

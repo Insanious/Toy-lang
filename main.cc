@@ -8,6 +8,7 @@ extern Subroutine* global;
 bool debug_lex = false;
 bool debug_grammar = false;
 bool log_output = false;
+bool debug_calls = true;
 
 void yy::parser::error(std::string const&err)
 {
