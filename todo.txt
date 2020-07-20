@@ -1,9 +1,12 @@
 FINISHED:
 int definition
 bool definition
+string definition
+
 
 int assignment
 bool assignment
+string assignment
 
 print function
 
@@ -13,12 +16,12 @@ if statement
 if statement {}
 
 scope
+_cool_ for loop (loop body) * n
 
 
 REMAINING:
 if elseif else statement
 nested if statements
 for loop
-_cool_ for loop (loop body) * n
 while loop
 arithmetic

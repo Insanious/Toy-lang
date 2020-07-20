@@ -63,10 +63,10 @@ true					{ log_lexer(yytext); return yy::parser::make_TRUE(true); }
 
 "int"					{ log_lexer(yytext); return yy::parser::make_INT(yytext); }
 "bool"					{ log_lexer(yytext); return yy::parser::make_BOOL(yytext); }
+"string"				{ log_lexer(yytext); return yy::parser::make_STRING(yytext); }
 
-\"[^\*\"]*\"			{ log_lexer(yytext); std::string str = yytext; return yy::parser::make_STRING(str.substr(1, yyleng - 2)); }
+\"[^\*\"]*\"			{ log_lexer(yytext); std::string str = yytext; return yy::parser::make_TEXT(str.substr(1, yyleng - 2)); }
 [a-zA-Z_][a-zA-Z0-9_]*	{ log_lexer(yytext); return yy::parser::make_ID(yytext); }
-
 
  /* Single-character tokens */
 \=						{ log_lexer(yytext); return yy::parser::make_ASSIGN(yytext); }

@@ -5,6 +5,7 @@ extern int lineNumber;
 extern bool debug_lex;
 extern bool debug_grammar;
 extern bool log_output;
-extern bool debug_calls;
+extern bool debug_executions;
+extern bool debug_binOps;
 
 #endif

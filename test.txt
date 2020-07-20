@@ -1,2 +1,3 @@
-if (true)
-	print(true);
+string s = "a string";
+
+print(s); * 5;

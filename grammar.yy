@@ -66,15 +66,16 @@
 
 /* Types */
 %token <std::string> INT
+%token <std::string> BOOL
+%token <std::string> STRING
+%token <std::string> FLOAT
+%token <std::string> ID
 
 /* Values */
-%token <std::string> ID
-%token <std::string> STRING
+%token <std::string> TEXT
 %token <int> NUMBER
-%token <std::string> BOOL
 %token <bool> TRUE
 %token <bool> FALSE
-%token <std::string> FLOAT
 
 /* Single-character tokens */
 %token <std::string> ASSIGN
@@ -134,7 +135,8 @@ ifstmt
 	| IF LROUND expr RROUND block	{ log_grammar("ifstmt:IF expr"); $$ = new Expression(global, ExprType::IFSTMT); $$->expressions.push_back($3); $$->block = $5; }
 
 forloop
-	: block MUL expr SEMICOLON		{ log_grammar("forloop:bracketloop"); $$ = new Expression(global, ExprType::FORLOOP); $$->block = $1; $$->expressions.push_back($3); }
+	: stmt MUL expr SEMICOLON		{ log_grammar("forloop:bracketloop"); $$ = new Expression(global, ExprType::FORLOOP); $$->block.push_back($1); $$->expressions.push_back($3); }
+	| block MUL expr SEMICOLON		{ log_grammar("forloop:bracketloop"); $$ = new Expression(global, ExprType::FORLOOP); $$->block = $1; $$->expressions.push_back($3); }
 
 block
 	: LCURLY stmts RCURLY			{ log_grammar("block:"); $$ = $2; }
@@ -145,10 +147,6 @@ vardef
 
 functioncall
 	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->expressions.push_back($3); }
-
-type
-	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
-	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
 
 assignment
 	: ID ASSIGN expr				{ log_grammar("assignment:ID = expr"); $$ = new Expression(global, ExprType::ASSIGNMENT); $$->value = new Value(DataType::IDENTIFIER); $$->value->name = $1; $$->expressions.push_back($3); }
@@ -167,4 +165,10 @@ op_last
 	: NUMBER						{ log_grammar("expr:NUMBER");	$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::INT);			$$->value->immediate.i = $1; }
 	| TRUE							{ log_grammar("expr:TRUE");		$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::BOOL);			$$->value->immediate.b = true; }
 	| FALSE							{ log_grammar("expr:FALSE");	$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::BOOL);			$$->value->immediate.b = false; }
+	| TEXT							{ log_grammar("expr:TEXT");		$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::STRING);		$$->value->str = $1; }
 	| ID							{ log_grammar("expr:ID");		$$ = new Expression(global, ExprType::IDENTIFIER);	$$->value = new Value(DataType::IDENTIFIER);	$$->value->name = $1; }
+
+type
+	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
+	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
+	| STRING						{ log_grammar("type:STRING"); $$ = DataType::STRING; }

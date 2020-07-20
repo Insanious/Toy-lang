@@ -61,7 +61,9 @@ void Subroutine::addIdentifier(Value* identifier)
 		scope = scope->parent;
 	}
 
-	identifiers.push_back(new Value(*identifier)); // make new copy
+	// Value copy = new Value(*identifier);
+	identifiers.push_back(identifier); // make new copy
+	// std::cout << "add f, l: " << identifier << ", " << identifiers.back();
 	log("new symbol '" + identifier->name + '\'');
 }
 

@@ -4,10 +4,16 @@
 std::vector<std::string> builtinData = { "print" };
 const std::vector<std::string> Expression::builtin = builtinData;
 
-void Expression::log_calls(std::string msg)
+void Expression::log_executions(std::string msg)
 {
-	if (debug_calls)
+	if (debug_executions)
 		std::cout << "CALL: " << msg << '\n';
+}
+
+void Expression::log_binOps(std::string msg)
+{
+	if (debug_binOps)
+		std::cout << "BINOP: " << msg << '\n';
 }
 
 Expression::Expression(Subroutine* sub, ExprType exprType)
@@ -25,6 +31,8 @@ Expression::Expression(Subroutine* sub, ExprType exprType, BinOp op)
 
 Expression* Expression::execute()
 {
+	log_executions("execute() " + std::to_string(int(exprType)));
+
 	switch (exprType)
 	{
 		case ExprType::DEFINITION:		executeDefinition();		break;
@@ -32,12 +40,7 @@ Expression* Expression::execute()
 		case ExprType::FUNCTIONCALL:	executeFunctionCall();		break;
 		case ExprType::IFSTMT:			executeIfStatement();		break;
 		case ExprType::FORLOOP:			executeForLoop();			break;
-		case ExprType::IDENTIFIER:
-		{
-			delete value;
-			value = sub->getIdentifierValue(value->name);
-			return this;
-		}
+		case ExprType::IDENTIFIER:		value = sub->getIdentifierValue(value->name);	return this;
 		case ExprType::BINOP:			return executeBinOp();
 		case ExprType::CONSTANT:		return this;
 	}
@@ -47,7 +50,7 @@ Expression* Expression::execute()
 
 void Expression::executeDefinition()
 {
-	log_calls("executeDefinition()");
+	log_executions("executeDefinition()");
 
 	Expression* expr = nullptr;
 
@@ -61,6 +64,7 @@ void Expression::executeDefinition()
 		{
 			case DataType::INT:			value->immediate.i = expr->value->immediate.i;	break;
 			case DataType::BOOL:		value->immediate.b = expr->value->immediate.b;	break;
+			case DataType::STRING:		value->str = expr->value->str;					break;
 			case DataType::IDENTIFIER:	std::cout << "executePrint() : IDENTIFIER";	break;
 			case DataType::FUNCTION:	std::cout << "executePrint() : FUNCTION";	break;
 		}
@@ -72,7 +76,7 @@ void Expression::executeDefinition()
 
 void Expression::executeAssignment()
 {
-	log_calls("executeAssignment()");
+	log_executions("executeAssignment()");
 
 	Value* currentValue = sub->getIdentifierValue(value->name);
 
@@ -84,8 +88,9 @@ void Expression::executeAssignment()
 	{
 		case DataType::INT:			currentValue->immediate.i = expr->value->immediate.i;	break;
 		case DataType::BOOL:		currentValue->immediate.b = expr->value->immediate.b;	break;
-		case DataType::IDENTIFIER:	std::cout << "executeAssignment() : IDENTIFIER";	break;
-		case DataType::FUNCTION:	std::cout << "executeAssignment() : FUNCTION";	break;
+		case DataType::STRING:		currentValue->str = expr->value->str;					break;
+		case DataType::IDENTIFIER:	std::cout << "executeAssignment() : IDENTIFIER";		break;
+		case DataType::FUNCTION:	std::cout << "executeAssignment() : FUNCTION";			break;
 	}
 	// delete currentValue; // delete old and ...
 	// currentValue = expr; // .. replace with new
@@ -95,7 +100,7 @@ void Expression::executeAssignment()
 
 Expression* Expression::executeFunctionCall()
 {
-	log_calls("executeFunctionCall()");
+	log_executions("executeFunctionCall()");
 
 	Expression* result = nullptr;
 	bool isBuiltin = false;
@@ -121,7 +126,7 @@ Expression* Expression::executeFunctionCall()
 
 Expression* Expression::executeBinOp()
 {
-	log_calls("executeBinOp()");
+	log_executions("executeBinOp()");
 	switch (op)
 	{
 		case BinOp::EQUALS: return binOpEquals();
@@ -132,7 +137,7 @@ Expression* Expression::executeBinOp()
 
 void Expression::executeIfStatement()
 {
-	log_calls("executeIfStatement()");
+	log_executions("executeIfStatement()");
 
 	Expression* expr = expressions[0]->execute();
 
@@ -154,7 +159,7 @@ void Expression::executeIfStatement()
 
 void Expression::executeForLoop()
 {
-	log_calls("executeForLoop()");
+	log_executions("executeForLoop()");
 
 	if (expressions.size() == 1) // bracketloop
 	{
@@ -177,26 +182,22 @@ void Expression::executeForLoop()
 
 void Expression::executePrint()
 {
-	log_calls("executePrint()");
+	log_executions("executePrint()");
 
 	Expression* expr = expressions[0]->execute();
 
 	switch (expr->value->dataType)
 	{
-		case DataType::INT:			std::cout << std::to_string(expr->value->immediate.i) << '\n';	break;
+		case DataType::INT:			std::cout << std::to_string(expr->value->immediate.i) << '\n';		break;
 		case DataType::BOOL:		std::cout << (expr->value->immediate.b ? "true" : "false") << '\n';	break;
-		case DataType::IDENTIFIER:	std::cout << "executePrint() : IDENTIFIER";	break;
-		case DataType::FUNCTION:	std::cout << "executePrint() : FUNCTION";	break;
+		case DataType::STRING:		std::cout << expr->value->str << '\n';								break;
+		case DataType::IDENTIFIER:	std::cout << "executePrint() : IDENTIFIER";							break;
+		case DataType::FUNCTION:	std::cout << "executePrint() : FUNCTION";							break;
 	}
 }
 
 void Expression::setScope(Subroutine* scope)
 {
-	// for (auto expression : expressions)
-	// {
-	// 	expression->sub = scope;
-	// 	expression->setScope(scope);
-	// }
 	for (auto statement : block)
 	{
 		statement->sub = scope;
@@ -206,23 +207,24 @@ void Expression::setScope(Subroutine* scope)
 
 Expression* Expression::binOpEquals()
 {
-	log_calls("binOpEquals()");
+	log_binOps("binOpEquals()");
 
-	Expression* left = expressions[0]->execute();
-	Expression* right = expressions[1]->execute();
+	Value* left = expressions[0]->execute()->value;
+	Value* right = expressions[1]->execute()->value;
 
-	if (left->value->dataType != right->value->dataType)
-		Subroutine::fatal("expected " + std::to_string((int)left->value->dataType) + " but got " + std::to_string((int)right->value->dataType));
+	if (left->dataType != right->dataType)
+		Subroutine::fatal("expected " + std::to_string((int)left->dataType) + " but got " + std::to_string((int)right->dataType));
 
 	Expression* expr = new Expression(sub, ExprType::CONSTANT);
 	expr->value = new Value(DataType::BOOL);
 
-	switch (left->value->dataType)
+	switch (left->dataType)
 	{
-		case DataType::INT:			expr->value->immediate.b = (left->value->immediate.i == right->value->immediate.i); break;
-		case DataType::BOOL:		expr->value->immediate.b = (left->value->immediate.b == right->value->immediate.b); break;
-		case DataType::IDENTIFIER:	Subroutine::fatal("binOpEquals: left->dataType == IDENTIFIER"); break;
-		case DataType::FUNCTION:	Subroutine::fatal("binOpEquals: left->dataType == FUNCTION"); break;
+		case DataType::INT:			expr->value->immediate.b = (left->immediate.i == right->immediate.i);	break;
+		case DataType::BOOL:		expr->value->immediate.b = (left->immediate.b == right->immediate.b);	break;
+		case DataType::STRING:		expr->value->immediate.b = (left->str == right->str);					break;
+		case DataType::IDENTIFIER:	Subroutine::fatal("binOpEquals: left->dataType == IDENTIFIER");			break;
+		case DataType::FUNCTION:	Subroutine::fatal("binOpEquals: left->dataType == FUNCTION");			break;
 	}
 
 	return expr;
@@ -282,8 +284,9 @@ std::string Expression::convertPrint(Expression* expression)
 {
 	switch (expression->value->dataType)
 	{
-		case DataType::INT:			return "std::cout << " + std::to_string(expression->value->immediate.i) + " << \n;"; break;
-		case DataType::BOOL:		return "std::cout << " + std::to_string(expression->value->immediate.b) + " << \n;"; break;
+		case DataType::INT:			return "std::cout << " + std::to_string(expression->value->immediate.i) + " << \n;";	break;
+		case DataType::BOOL:		return "std::cout << " + std::to_string(expression->value->immediate.b) + " << \n;";	break;
+		case DataType::STRING:		return "std::cout << " + expression->value->str + " << \n;";							break;
 		case DataType::IDENTIFIER:	break;
 		case DataType::FUNCTION:	break;
 	}

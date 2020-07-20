@@ -14,7 +14,8 @@ class Symbol;
 class Expression
 {
 public:
-	void log_calls(std::string msg);
+	void log_executions(std::string msg);
+	void log_binOps(std::string msg);
 
 	static const std::vector<std::string> builtin;
 
