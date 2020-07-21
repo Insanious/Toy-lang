@@ -6,10 +6,10 @@
 extern FILE* yyin;
 extern Subroutine* global;
 bool debug_lex = false;
-bool debug_grammar = false;
-bool log_output = false;
-bool debug_executions = false;
-bool debug_binOps = false;
+bool debug_grammar = true;
+bool log_output = true;
+bool debug_executions = true;
+bool debug_binOps = true;
 
 void yy::parser::error(std::string const&err)
 {

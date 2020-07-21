@@ -19,6 +19,7 @@ public:
 	Subroutine* parent;
 	std::vector<Expression*> expressions;
 	std::vector<Value*> identifiers;
+	std::vector<Expression*> functions;
 
 	std::string output;
 
@@ -28,11 +29,13 @@ public:
 	static void fatal(std::string msg);
 	static void log(std::string msg);
 
-	void clearIdentifiers();
 	void execute();
+
 	void addIdentifier(Value* identifier);
 	Value* getIdentifierValue(std::string name);
-	bool identifierExists(std::string name);
+
+	void addFunction(Expression* function);
+	Expression* getFunction(std::string name);
 };
 
 #endif

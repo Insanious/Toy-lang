@@ -8,4 +8,20 @@ extern bool log_output;
 extern bool debug_executions;
 extern bool debug_binOps;
 
+#include <iostream>
+#include <string>
+
+// static void fatal(std::string msg)
+// {
+// 	std::cout << "FATAL:\t\t" << msg << '\n';
+// 	exit(0);
+// }
+//
+// static void log(std::string msg)
+// {
+// 	if (log_output)
+// 		std::cout << "LOG:\t\t" << msg << '\n';
+// }
+
+
 #endif

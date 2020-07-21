@@ -1,3 +1,1 @@
-string s = "a string";
-
-print(s); * 5;
+int a = 2; * 3;

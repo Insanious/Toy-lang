@@ -1,7 +1,8 @@
 FLAGS = -std=c++11 -g -Wall -Wpedantic
 
 parser: lex.yy.c grammar.tab.o Subroutine.o Expression.o main.cc
-	g++ $(FLAGS) -o parser grammar.tab.o Subroutine.o Expression.o lex.yy.c main.cc
+	g++ $(FLAGS) -o parser grammar.tab.o Subroutine.o Expression.o  lex.yy.c main.cc
+	@echo --- SUCCESSFUL ---
 grammar.tab.o: grammar.tab.cc
 	g++ $(FLAGS) -c grammar.tab.cc
 

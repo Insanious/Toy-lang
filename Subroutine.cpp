@@ -3,14 +3,14 @@
 
 void Subroutine::fatal(std::string msg)
 {
-	std::cout << "FATAL:\t\t" << msg << '\n';
+	std::cout << "FATAL_SUB:\t" << msg << '\n';
 	exit(0);
 }
 
 void Subroutine::log(std::string msg)
 {
 	if (log_output)
-		std::cout << "LOG:\t\t" << msg << '\n';
+		std::cout << "LOG_SUB:\t" << msg << '\n';
 }
 
 Subroutine::Subroutine()
@@ -21,18 +21,6 @@ Subroutine::Subroutine()
 Subroutine::Subroutine(Subroutine* parent)
 {
 	this->parent = parent;
-}
-
-void Subroutine::clearIdentifiers()
-{
-	int size = identifiers.size();
-	for(int i = 0; i < size; i++)
-	{
-		std::cout << identifiers[i]->name << '\n';
-		delete identifiers[i];
-		identifiers[i] = nullptr;
-	}
-	identifiers.clear();
 }
 
 void Subroutine::execute()
@@ -49,28 +37,17 @@ void Subroutine::execute()
 
 void Subroutine::addIdentifier(Value* identifier)
 {
-	Subroutine* scope = this;
-	while (scope)
-	{
-		for (auto id : identifiers)
-		{
-			std::cout << id << '\n';
-			if (id->name == identifier->name)
-				fatal("symbol '" + identifier->name + "' is already defined");
-		}
-		scope = scope->parent;
-	}
+	if (getIdentifierValue(identifier->name))
+		fatal("symbol '" + identifier->name + "' is already defined");
 
-	// Value copy = new Value(*identifier);
-	identifiers.push_back(identifier); // make new copy
-	// std::cout << "add f, l: " << identifier << ", " << identifiers.back();
+	identifiers.push_back(identifier);
 	log("new symbol '" + identifier->name + '\'');
 }
 
 Value* Subroutine::getIdentifierValue(std::string name)
 {
 	Subroutine* scope = this;
-	while (scope)
+	while (scope) // search and return the identifier
 	{
 		for (auto id : scope->identifiers)
 			if (id->name == name)
@@ -79,21 +56,29 @@ Value* Subroutine::getIdentifierValue(std::string name)
 		scope = scope->parent;
 	}
 
-	fatal("symbol '" + name + "' is never defined");
 	return nullptr;
 }
 
-bool Subroutine::identifierExists(std::string name)
+void Subroutine::addFunction(Expression* function)
+{
+	if (getFunction(function->functionName))
+		fatal("function '" + function->functionName + "' is already defined");
+
+	functions.push_back(function);
+	log("new function '" + function->functionName + '\'');
+}
+
+Expression* Subroutine::getFunction(std::string name)
 {
 	Subroutine* scope = this;
-	while (scope)
+	while (scope) // search and return the function
 	{
-		for (auto id : scope->identifiers)
-			if (id->name == name)
-				return true;
+		for (auto function : scope->functions)
+			if (function->functionName == name)
+				return function;
 
 		scope = scope->parent;
 	}
 
-	return false;
+	return nullptr;
 }

@@ -65,6 +65,7 @@
 %token <std::string> OR
 
 /* Types */
+%token <std::string> NONE
 %token <std::string> INT
 %token <std::string> BOOL
 %token <std::string> STRING
@@ -98,6 +99,7 @@
 
 %type <Expression*> stmt
 %type <Expression*> vardef
+%type <Expression*> funcdef
 %type <Expression*> functioncall
 %type <Expression*> assignment
 %type <Expression*> ifstmt
@@ -127,6 +129,7 @@ stmt
 	: vardef SEMICOLON				{ log_grammar("stmt:vardef"); $$ = $1; }
 	| assignment SEMICOLON			{ log_grammar("stmt:assignment"); $$ = $1; }
 	| functioncall SEMICOLON		{ log_grammar("stmt:functioncall"); $$ = $1; }
+	| funcdef						{ log_grammar("stmt:functiondefinition"); $$ = $1; }
 	| ifstmt						{ log_grammar("stmt:ifstmt"); $$ = $1; }
 	| forloop						{ log_grammar("stmt:forloop"); $$ = $1; }
 
@@ -141,15 +144,25 @@ forloop
 block
 	: LCURLY stmts RCURLY			{ log_grammar("block:"); $$ = $2; }
 
+funcdef
+	: type ID LROUND RROUND block	{ log_grammar("funcdef:"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->block = $5; }
+	//| type ID LROUND expr RROUND block	{ log_grammar("funcdef:"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$$$->block = $6; }
+
 vardef
 	: type ID ASSIGN expr			{ log_grammar("vardef:expr"); $$ = new Expression(global, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; $$->expressions.push_back($4); }
 	| type ID						{ log_grammar("vardef:"); $$ = new Expression(global, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; }
 
 functioncall
-	: ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->expressions.push_back($3); }
+	: ID LROUND RROUND				{ log_grammar("functioncall:"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; }
+	| ID LROUND expr RROUND			{ log_grammar("functioncall:expr"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->expressions.push_back($3); }
 
 assignment
 	: ID ASSIGN expr				{ log_grammar("assignment:ID = expr"); $$ = new Expression(global, ExprType::ASSIGNMENT); $$->value = new Value(DataType::IDENTIFIER); $$->value->name = $1; $$->expressions.push_back($3); }
+
+type
+	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
+	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
+	| STRING						{ log_grammar("type:STRING"); $$ = DataType::STRING; }
 
 expr
 	: op							{ log_grammar("expr:op"); $$ = $1; }
@@ -167,8 +180,3 @@ op_last
 	| FALSE							{ log_grammar("expr:FALSE");	$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::BOOL);			$$->value->immediate.b = false; }
 	| TEXT							{ log_grammar("expr:TEXT");		$$ = new Expression(global, ExprType::CONSTANT);	$$->value = new Value(DataType::STRING);		$$->value->str = $1; }
 	| ID							{ log_grammar("expr:ID");		$$ = new Expression(global, ExprType::IDENTIFIER);	$$->value = new Value(DataType::IDENTIFIER);	$$->value->name = $1; }
-
-type
-	: INT							{ log_grammar("type:INT"); $$ = DataType::INT; }
-	| BOOL							{ log_grammar("type:BOOL"); $$ = DataType::BOOL; }
-	| STRING						{ log_grammar("type:STRING"); $$ = DataType::STRING; }

@@ -61,6 +61,8 @@ true					{ log_lexer(yytext); return yy::parser::make_TRUE(true); }
 [0-9]+\.[0-9]+	 		{ log_lexer(yytext); return yy::parser::make_FLOAT(yytext); }
 [0-9]+					{ log_lexer(yytext); return yy::parser::make_NUMBER(std::stoi(yytext)); }
 
+ /* Types */
+"none"					{ log_lexer(yytext); return yy::parser::make_NONE(yytext); }
 "int"					{ log_lexer(yytext); return yy::parser::make_INT(yytext); }
 "bool"					{ log_lexer(yytext); return yy::parser::make_BOOL(yytext); }
 "string"				{ log_lexer(yytext); return yy::parser::make_STRING(yytext); }

@@ -12,16 +12,23 @@ print function
 
 expr == expr
 
-if statement
-if statement {}
+if statement single stmt
+if statement block
+nested if statements
 
 scope
-_cool_ for loop (loop body) * n
+_cool_ for loop "{ loop body } * n;"
 
+function def
+function defs in functions
 
 REMAINING:
+function arguments
+return value
+recursion
+index from bracketloops
 if elseif else statement
-nested if statements
 for loop
 while loop
 arithmetic
+ALL THE TESTSSSSS
