@@ -157,8 +157,31 @@ Expression* Expression::executeFunctionCall()
 		if (!function)
 			fatal("function '" + functionName + "' is never defined");
 
+		if (function->arguments.size() != this->arguments.size())
+		{
+			if (function->arguments.size() == 1)
+				fatal("expected " + std::to_string((int)function->arguments.size()) + " argument but got " + std::to_string((int)this->arguments.size()) +  " in function '" + functionName + "'");
+			fatal("expected " + std::to_string((int)function->arguments.size()) + " arguments but got " + std::to_string((int)this->arguments.size()) +  " in function '" + functionName + "'");
+		}
+
+		int nrOfArguments = function->arguments.size();
+		for (int i = 0; i < nrOfArguments; i++)
+			if (function->arguments[i]->value->dataType != this->arguments[i]->execute()->value->dataType)
+				fatal("expected argument " + std::to_string(i) +  " to be of type " + std::to_string((int)function->arguments[i]->value->dataType) + " but got " + std::to_string((int)this->arguments[i]->execute()->value->dataType) +  " in function '" + functionName + "'");
+
 		Subroutine newScope = Subroutine(scope);
 		function->setScope(&newScope);
+
+		for (int i = 0; i < nrOfArguments; i++)
+		{
+			// execute definition with value of this->argument->value
+			Value* argValue = this->arguments[i]->execute()->value;
+
+			function->arguments[i]->value->immediate = argValue->immediate;
+			function->arguments[i]->value->str = argValue->str;
+			function->arguments[i]->execute();
+		}
+
 		for (auto stmt : function->block)
 			stmt->execute();
 	}
@@ -224,7 +247,7 @@ void Expression::executePrint()
 {
 	log_executions("executePrint()");
 
-	Expression* expr = expressions[0]->execute();
+	Expression* expr = arguments[0]->execute();
 
 	switch (expr->value->dataType)
 	{
@@ -242,6 +265,12 @@ void Expression::setScope(Subroutine* newScope)
 	{
 		statement->scope = newScope;
 		statement->setScope(newScope);
+	}
+
+	for (auto arg : arguments)
+	{
+		arg->scope = newScope;
+		arg->setScope(newScope);
 	}
 }
 

@@ -22,6 +22,7 @@ public:
 	Subroutine* scope;
 	std::vector<Expression*> expressions;
 	std::vector<Expression*> block;
+	std::vector<Expression*> arguments;
 	ExprType exprType;
 	BinOp binOp;
 

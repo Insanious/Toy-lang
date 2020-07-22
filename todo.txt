@@ -22,8 +22,10 @@ _cool_ for loop "{ loop body } * n;"
 function def
 function defs in functions
 
-REMAINING:
+IN PROGRESS:
 function arguments
+
+REMAINING:
 return value
 recursion
 index from bracketloops
