@@ -35,6 +35,8 @@ public:
 	static void fatal(std::string msg);
 	static void log(std::string msg);
 
+	void checkFunctionArguments();
+
 	Expression* execute();
 	Expression*	executeIdentifier();
 	void executeDefinition();

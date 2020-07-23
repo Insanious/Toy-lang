@@ -21,12 +21,12 @@ _cool_ for loop "{ loop body } * n;"
 
 function def
 function defs in functions
-
-IN PROGRESS:
 function arguments
 
-REMAINING:
+IN PROGRESS:
 return value
+
+REMAINING:
 recursion
 index from bracketloops
 if elseif else statement

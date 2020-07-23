@@ -1,6 +1,8 @@
-int func(bool b)
+int func(int a, int b)
 {
+	print(a);
 	print(b);
 }
-bool a = true;
-func(a);
+int a = 123;
+int b = 456;
+func(a, b);

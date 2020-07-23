@@ -96,6 +96,8 @@
 
 %type <std::vector<Expression*>> stmts
 %type <std::vector<Expression*>> block
+%type <std::vector<Expression*>> arglist
+%type <std::vector<Expression*>> exprlist
 
 %type <Expression*> stmt
 %type <Expression*> vardef
@@ -147,12 +149,20 @@ block
 	: LCURLY stmts RCURLY			{ log_grammar("block:"); $$ = $2; }
 
 funcdef
-	: type ID LROUND RROUND block		{ log_grammar("funcdef:"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->block = $5; }
-	| type ID LROUND arg RROUND block	{ log_grammar("funcdef:arg"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->block = $6; $$->arguments.push_back( $4); }
-	//| type ID LROUND expr RROUND block	{ log_grammar("funcdef:"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$$$->block = $6; }
+	: type ID LROUND RROUND block			{ log_grammar("funcdef:"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->block = $5; }
+	| type ID LROUND arg RROUND block		{ log_grammar("funcdef:arg"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->arguments.push_back($4); $$->block = $6; }
+	| type ID LROUND arglist RROUND block	{ log_grammar("funcdef:arglist"); $$ = new Expression(global, ExprType::FUNCTIONDEFINITION); $$->value = new Value($1); $$->functionName = $2; $$->arguments = $4; $$->block = $6; }
 
 arg
 	: type ID						{ log_grammar("arg:type ID"); $$ = new Expression(global, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; }
+
+arglist
+	: arg COMMA arg					{ log_grammar("arglist:args"); $$.push_back($1); $$.push_back($3); }
+	| arglist COMMA arg				{ log_grammar("arglist:argss"); $$ = $1; $$.push_back($3); }
+
+exprlist
+	: expr COMMA expr				{ log_grammar("exprlist:exprs"); $$.push_back($1); $$.push_back($3); }
+	| exprlist COMMA expr			{ log_grammar("exprlist:exprss"); $$ = $1; $$.push_back($3); }
 
 vardef
 	: type ID ASSIGN expr SEMICOLON	{ log_grammar("vardef:expr"); $$ = new Expression(global, ExprType::DEFINITION); $$->value = new Value($1); $$->value->name = $2; $$->expressions.push_back($4); }
@@ -161,6 +171,7 @@ vardef
 funccall
 	: ID LROUND RROUND SEMICOLON		{ log_grammar("funccall:"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; }
 	| ID LROUND expr RROUND SEMICOLON	{ log_grammar("funccall:expr"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->arguments.push_back($3); }
+	| ID LROUND exprlist RROUND SEMICOLON	{ log_grammar("funccall:expr"); $$ = new Expression(global, ExprType::FUNCTIONCALL); $$->functionName = $1; $$->arguments = $3; }
 
 assignment
 	: ID ASSIGN expr SEMICOLON		{ log_grammar("assignment:ID = expr"); $$ = new Expression(global, ExprType::ASSIGNMENT); $$->value = new Value(DataType::IDENTIFIER); $$->value->name = $1; $$->expressions.push_back($3); }

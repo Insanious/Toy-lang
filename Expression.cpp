@@ -41,6 +41,30 @@ Expression::Expression(Subroutine* scope, ExprType exprType, BinOp binOp)
 	this->binOp = binOp;
 }
 
+void Expression::checkFunctionArguments()
+{
+	Expression* function = scope->getFunction(functionName);
+
+	if (!function)
+		fatal("function '" + functionName + "' is never defined");
+
+	// check that the number of expected arguments are equal to the number of actual arguments
+	if (function->arguments.size() != this->arguments.size())
+	{
+		std::string msg = "expected " + std::to_string((int)function->arguments.size()) + " argument";
+		if (function->arguments.size() != 1)
+			msg += 's';
+		msg += " but got " + std::to_string((int)this->arguments.size()) +  " in function '" + functionName + '\'';
+		fatal(msg);
+	}
+
+	int nrOfArguments = function->arguments.size();
+	// check expected argument types against the actual arguments
+	for (int i = 0; i < nrOfArguments; i++)
+		if (function->arguments[i]->value->dataType != this->arguments[i]->execute()->value->dataType)
+			fatal("expected argument " + std::to_string(i) +  " to be of type " + std::to_string((int)function->arguments[i]->value->dataType) + " but got " + std::to_string((int)this->arguments[i]->execute()->value->dataType) +  " in function '" + functionName + "'");
+}
+
 Expression* Expression::execute()
 {
 	log_executions("execute() " + std::to_string(int(exprType)));
@@ -153,35 +177,26 @@ Expression* Expression::executeFunctionCall()
 	}
 	else
 	{
+		checkFunctionArguments();
 		Expression* function = scope->getFunction(functionName);
-		if (!function)
-			fatal("function '" + functionName + "' is never defined");
 
-		if (function->arguments.size() != this->arguments.size())
-		{
-			if (function->arguments.size() == 1)
-				fatal("expected " + std::to_string((int)function->arguments.size()) + " argument but got " + std::to_string((int)this->arguments.size()) +  " in function '" + functionName + "'");
-			fatal("expected " + std::to_string((int)function->arguments.size()) + " arguments but got " + std::to_string((int)this->arguments.size()) +  " in function '" + functionName + "'");
-		}
-
-		int nrOfArguments = function->arguments.size();
-		for (int i = 0; i < nrOfArguments; i++)
-			if (function->arguments[i]->value->dataType != this->arguments[i]->execute()->value->dataType)
-				fatal("expected argument " + std::to_string(i) +  " to be of type " + std::to_string((int)function->arguments[i]->value->dataType) + " but got " + std::to_string((int)this->arguments[i]->execute()->value->dataType) +  " in function '" + functionName + "'");
-
-		Subroutine newScope = Subroutine(scope);
+		// the scopes parent is nullptr because a function is contained and does not have access to global identifiers
+		Subroutine newScope = Subroutine(nullptr);
 		function->setScope(&newScope);
 
+		Value* argValue = nullptr;
+		int nrOfArguments = function->arguments.size();
+		// execute function argument definitions with values from this->argument
 		for (int i = 0; i < nrOfArguments; i++)
 		{
-			// execute definition with value of this->argument->value
-			Value* argValue = this->arguments[i]->execute()->value;
+			argValue = this->arguments[i]->execute()->value;
 
 			function->arguments[i]->value->immediate = argValue->immediate;
 			function->arguments[i]->value->str = argValue->str;
 			function->arguments[i]->execute();
 		}
 
+		// execute the block
 		for (auto stmt : function->block)
 			stmt->execute();
 	}
